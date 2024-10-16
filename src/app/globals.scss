@@ -74,3 +74,28 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+.timeline {
+  padding: 90px 0px;
+
+  &-labels {
+    @apply text-muted-foreground flex justify-between;
+  }
+
+  &-container {
+    @apply w-full bg-neutral-200 h-[60px] relative;
+    
+    .timeline-item--moving {
+      @apply absolute left-0 top-0 bg-red-400 w-[5px] h-full z-10;
+    }
+
+    .timeline-item--keyframe {
+      @apply absolute left-0 top-0 bg-blue-400 w-[5px] h-full;
+    }
+  }
+}
+
+.group-field {
+  @apply flex flex-col space-y-4;
+}
