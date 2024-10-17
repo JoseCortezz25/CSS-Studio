@@ -21,13 +21,14 @@ const Timeline = ({
   const lastTime = useRef<number>(0);
   const animationFrameRef = useRef<number>(0);
   const [currentTime, setCurrentTime] = useState(0);
+  const [currentAction, setCurrentAction] = useState(ButtonActions.PAUSE);
   const [animation, setAnimation] = useState({
     elapsedTime: 0,
     currentPosition: 0
   });
 
   const animate = (timestamp: number) => {
-    if (!startRef.current) startRef.current = timestamp;
+    if (startRef.current === 0) startRef.current = timestamp;
     const elapsedTime = parseFloat(totalTime) ? startTime.current : 0;
     const elapsed = timestamp - startRef.current + elapsedTime;
     lastTime.current = elapsed;
@@ -58,37 +59,36 @@ const Timeline = ({
   };
 
   useEffect(() => {
-    // if (animationFrameRef.current) {
-    // startRef.current = 0; // Reset start time
-    requestAnimationFrame(animate);
-    // } else if (animationFrameRef.current) {
-    //   cancelAnimationFrame(animationFrameRef.current);
-    // }
+    if (currentAction !== ButtonActions.PAUSE) {
+      animationFrameRef.current = requestAnimationFrame(animate);
+    } else if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
 
     return () => {
-      // cancelAnimationFrame(animationFrameRef.current);
+      cancelAnimationFrame(animationFrameRef.current);
     };
   }, [totalTime]);
-
-  // Controls Timeline 
-  // const pause = () => {
-  //   cancelAnimationFrame(animationFrameRef.current);
-  // };
-  // const play = () => { };
-  // const rewind = () => { };
 
   const toggleAction = (action: string) => {
     if (action === ButtonActions.PAUSE) {
       cancelAnimationFrame(animationFrameRef.current);
+      setCurrentAction(ButtonActions.PAUSE);
     }
 
     if (action === ButtonActions.REWIND) {
       startRef.current = 0;
+      setCurrentAction(ButtonActions.REWIND);
       requestAnimationFrame(animate);
     }
 
     if (action === ButtonActions.PLAY) {
-      startRef.current = lastTime.current;
+      if (currentAction === ButtonActions.PAUSE) {
+        startRef.current = performance.now() - animation.elapsedTime;
+      } else {
+        startRef.current = 0;
+      }
+      setCurrentAction(ButtonActions.PLAY);
       requestAnimationFrame(animate);
     }
   };
@@ -132,12 +132,14 @@ const Timeline = ({
           />
         ))}
       </div>
-      <button onClick={() => toggleAction(ButtonActions.PAUSE)}>Pause</button>
-      <button onClick={() => toggleAction(ButtonActions.PLAY)}>Play</button>
-      <button onClick={() => toggleAction(ButtonActions.REWIND)}>Rewind</button>
-      <Button onClick={setKeyframe}>
-        Add Keyframe
-      </Button>
+      <div className="flex gap-2 mt-4">
+        <Button variant="default" onClick={() => toggleAction(ButtonActions.PAUSE)}>Pause</Button>
+        <Button variant="default" onClick={() => toggleAction(ButtonActions.PLAY)}>Play</Button>
+        <Button variant="default" onClick={() => toggleAction(ButtonActions.REWIND)}>Rewind</Button>
+        <Button variant="default" onClick={setKeyframe}>
+          Add Keyframe
+        </Button>
+      </div>
     </section>
   );
 };

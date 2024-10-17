@@ -1,22 +1,108 @@
 "use client";
 import Timeline from "@/components/common/timeline";
 import { Input } from "@/components/ui/input";
+import { example } from "@/lib/example";
 import { Keyframe } from "@/lib/types";
 import { Eye, Settings } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function Home() {
   const [keyframes, setKeyframes] = useState<Keyframe[]>([]);
+  const [codeToPreview, setCodeToPreview] = useState<string>(example);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const updateKeyframes = (keyframe: Keyframe) => {
     setKeyframes(prev => [...prev, keyframe]);
-    // console.log("keyframes", keyframes);
   };
+
+  const insertScript = (iframeDocument: Document) => {
+    const script = document.createElement("script");
+    script.textContent = /*javascript*/`
+        let currentHightline = null;
+        let selectedElement = {
+          selected: false,
+          element: null
+        };
+  
+        document.body.addEventListener("mouseover", (event) => {
+          const element = event.target;
+          if (selectedElement.element !== element) {
+            if (currentHightline && currentHightline !== selectedElement.element) {
+              currentHightline.style.outline = "";
+            }
+            element.style.outline = "2px solid red";
+            currentHightline = element;
+  
+            element.addEventListener("mouseout", () => {
+              if (selectedElement.element !== element) {
+                element.style.outline = "";
+              }
+            });
+          }
+        });
+  
+        document.body.addEventListener("click", (event) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const element = event.target;
+  
+          if (selectedElement.element) {
+            selectedElement.element.style.outline = "";
+          }
+          element.style.outline = "2px solid red";
+          selectedElement = {
+            selected: true,
+            element
+          };
+  
+          if (element.textContent.trim()) {
+            element.setAttribute("contenteditable", "true");
+            element.focus();
+  
+            element.addEventListener("blur", () => {
+              element.removeAttribute("contenteditable");
+            });
+          }
+  
+          const elementInfo = {
+            tagName: element.tagName,
+            id: element.id,
+            classList: element.classList,
+            textContent: element.textContent.trim().substring(0, 50) + '...'
+          }
+  
+          if (elementInfo.tagName === "IMG") {
+            element.addEventListener("click", () => {
+              try {
+                window.parent.postMessage(JSON.stringify({ type: 'contextmenu', value: true }), "*");
+              } catch (error) {
+                console.error("Error", error);
+              }
+            });
+          }
+  
+          window.parent.postMessage(JSON.stringify({ type: 'send-element', data: JSON.stringify(elementInfo) }), "*");
+        });
+      `;
+
+    iframeDocument.body.appendChild(script);
+  };
+
+  useEffect(() => {
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+
+    iframe.onload = () => {
+      const iframeDocument = iframe.contentDocument;
+      if (!iframeDocument) return;
+
+      insertScript(iframeDocument);
+    };
+  }, []);
+
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between">
-
-
       <div className="w-full">
 
         <div className="container mx-auto">
@@ -27,7 +113,7 @@ export default function Home() {
           />
         </div>
 
-        <div className="container mx-auto w-full flex justify-center gap-2  min-h-screen pb-20">
+        <div className="container mx-auto w-full flex justify-center gap-2 pb-20">
           <div className="w-[30%] h-full">
             <h2 className="flex gap-2 mb-7">
               <Settings className="size-[24px]" />
@@ -105,12 +191,16 @@ export default function Home() {
             {/* Background and color*/}
           </div>
 
-          <div className="w-[60%] min-h-screen relative bg-neutral-300/30 rounded-xl">
+          <div className="w-[60%] min-h-[50%] relative bg-neutral-200/30 rounded-xl">
             <span className="flex gap-2 absolute top-2 right-2 bg-neutral-800 backdrop-blur-sm rounded-full px-3 py-1 text-white">
               <Eye className="size-[24px]" />
               Vista Previa
             </span>
-            {/* <iframe className="w-full h-full" srcDoc={exampleCard}></iframe> */}
+            <iframe
+              className="w-full h-full"
+              srcDoc={example}
+              ref={iframeRef}
+            />
           </div>
 
         </div>
