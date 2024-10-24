@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "../ui/button";
-import { ButtonActions, Keyframe } from "@/lib/types";
+import { ButtonActions, Keyframe } from "@/libs/types";
 
 interface TimelineProps {
   totalTime: string;
