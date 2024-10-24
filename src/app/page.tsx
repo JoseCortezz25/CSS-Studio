@@ -1,8 +1,8 @@
 "use client";
 import Timeline from "@/components/common/timeline";
 import { Input } from "@/components/ui/input";
-import { example } from "@/lib/example";
-import { Keyframe } from "@/lib/types";
+import { example } from "@/libs/example";
+import { Keyframe } from "@/libs/types";
 import { Eye, Settings } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -42,8 +42,8 @@ export default function Home() {
         });
   
         document.body.addEventListener("click", (event) => {
-          e.preventDefault();
-          e.stopPropagation();
+          event.preventDefault();
+          event.stopPropagation();
           const element = event.target;
   
           if (selectedElement.element) {
@@ -85,6 +85,8 @@ export default function Home() {
         });
       `;
 
+    console.log("script", script);
+
     iframeDocument.body.appendChild(script);
   };
 
@@ -96,9 +98,12 @@ export default function Home() {
       const iframeDocument = iframe.contentDocument;
       if (!iframeDocument) return;
 
+      console.log("iframeRef.current", iframeRef.current);
+
+
       insertScript(iframeDocument);
     };
-  }, []);
+  }, [iframeRef.current]);
 
 
   return (
@@ -120,9 +125,8 @@ export default function Home() {
               Establecer Propiedades
             </h2>
 
-            {/* Translate */}
+            {/* Configuracion */}
             <div className="flex flex-col w-[75%]">
-
 
               <div className="px-4 py-4 border border-neutral-200 rounded-md mb-9">
                 <div className="flex flex-col gap-4">
@@ -188,10 +192,14 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Background and color*/}
           </div>
 
-          <div className="w-[60%] min-h-[50%] relative bg-neutral-200/30 rounded-xl">
+          <div className="w-[60%]">
+            Data:
+
+          </div>
+
+          {/* <div className="w-[60%] min-h-[50%] relative bg-neutral-200/30 rounded-xl">
             <span className="flex gap-2 absolute top-2 right-2 bg-neutral-800 backdrop-blur-sm rounded-full px-3 py-1 text-white">
               <Eye className="size-[24px]" />
               Vista Previa
@@ -201,7 +209,7 @@ export default function Home() {
               srcDoc={example}
               ref={iframeRef}
             />
-          </div>
+          </div> */}
 
         </div>
 
