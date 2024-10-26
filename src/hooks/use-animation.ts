@@ -1,4 +1,4 @@
-enum Actions {
+export enum Actions {
   ADD_KEYFRAME = 'ADD_KEYFRAME',
   UPDATE_KEYFRAME = 'UPDATE_KEYFRAME',
   DELETE_KEYFRAME = 'DELETE_KEYFRAME'
@@ -37,6 +37,15 @@ const initialState: Keyframe[] = [];
 function animationReducer(state: Keyframe[], action: AnimationAction): Keyframe[] {
   switch (action.type) {
     case Actions.ADD_KEYFRAME:
+      const existingKeyframeIndex = state.findIndex(keyframe => keyframe.time === action.payload.time);
+      if (existingKeyframeIndex !== -1) {
+      const updatedKeyframe = { ...state[existingKeyframeIndex], ...action.payload };
+      return [
+        ...state.slice(0, existingKeyframeIndex),
+        updatedKeyframe,
+        ...state.slice(existingKeyframeIndex + 1)
+      ];
+      }
       return [...state, action.payload];
 
     case Actions.UPDATE_KEYFRAME:

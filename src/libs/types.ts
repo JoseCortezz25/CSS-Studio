@@ -2,13 +2,13 @@ export interface Keyframe {
   position: number;
   time: string;
   properties: {
-    translateX: string;
-    translateY: string;
-    opacity: string;
-    width: string;
-    height: string;
-    background: string;
-    color: string;
+    translateX?: string;
+    translateY?: string;
+    opacity?: string;
+    width?: string;
+    height?: string;
+    background?: string;
+    color?: string;
   };
 }
 
